@@ -63,28 +63,7 @@ def home():
     return {"message": "Automotive Catalog API is active"}
 
 @app.post("/remove-bg")
-async def remove_background(image: UploadFile = File(...)):
-    try:
-        input_data = await image.read()
-        input_image = Image.open(io.BytesIO(input_data))
-        
-        car, car_flipped = process_car_image(input_image)
-        if car is None:
-            raise HTTPException(status_code=400, detail="No vehicle detected")
-            
-        return {
-            "filename": image.filename,
-            "images": [
-                {"label": "Original", "data": to_b64(car), "suffix": "original"},
-                {"label": "Mirrored", "data": to_b64(car_flipped), "suffix": "mirrored"}
-            ]
-        }
-    except Exception as e:
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/remove-bg-batch")
-async def remove_background_batch(images: List[UploadFile] = File(...)):
+async def remove_background(images: List[UploadFile] = File(...)):
     try:
         results = []
         for image in images:

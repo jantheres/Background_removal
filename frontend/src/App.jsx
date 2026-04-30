@@ -75,8 +75,8 @@ function App() {
     });
 
     try {
-      // Point to their new batch endpoint
-      const response = await fetch(`${API_BASE_URL}/remove-bg-batch`, {
+      // Point to the unified batch endpoint
+      const response = await fetch(`${API_BASE_URL}/remove-bg`, {
         method: 'POST',
         body: formData,
       });
