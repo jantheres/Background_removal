@@ -158,6 +158,60 @@ body {
   background: repeating-conic-gradient(#f0f0f0 0% 25%, #fff 0% 50%) 50% / 20px 20px;
 }
 
+/* Gallery Styles */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+.gallery-item {
+  background: var(--drop-zone-bg);
+  border-radius: 16px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  position: relative;
+  border: 1px solid var(--glass-border);
+}
+
+.gallery-item img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 8px;
+  background: repeating-conic-gradient(#f0f0f0 0% 25%, #fff 0% 50%) 50% / 10px 10px;
+}
+
+.status-badge {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.status-pending { background: #edf2f7; color: #4a5568; }
+.status-processing { background: #ebf8ff; color: #2b6cb0; }
+.status-completed { background: #f0fff4; color: #2f855a; }
+.status-error { background: #fff5f5; color: #c53030; }
+
+.batch-actions {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+}
+
+.loader {
+  animation: spin 1s linear infinite;
+}
+
 .btn-primary {
   background: var(--accent);
   color: white;
