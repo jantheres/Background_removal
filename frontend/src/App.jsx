@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Upload, Image as ImageIcon, Download, Sun, Moon, RefreshCw, Loader2, Sparkles, X, CheckCircle } from 'lucide-react';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+
 function App() {
   const [theme, setTheme] = useState('dark');
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -74,7 +76,7 @@ function App() {
 
     try {
       // Point to their new batch endpoint
-      const response = await fetch('http://127.0.0.1:8000/remove-bg-batch', {
+      const response = await fetch(`${API_BASE_URL}/remove-bg-batch`, {
         method: 'POST',
         body: formData,
       });
