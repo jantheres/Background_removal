@@ -32,11 +32,15 @@ def to_b64(img):
     return f"data:image/png;base64,{base64.b64encode(buff.getvalue()).decode('utf-8')}"
 
 def process_car_image(input_image):
+    # SPEED OPTIMIZATION: Shrink huge 4K images down to max 1024px to save CPU time
+    input_image.thumbnail((1024, 1024), Image.LANCZOS)
+
     # Ensure RGB for background removal
     if input_image.mode != "RGB":
         input_image = input_image.convert("RGB")
         
-    no_bg = remove(input_image, session=models["isnet"], alpha_matting=True)
+    # Disabled alpha_matting: Cars have hard edges, so matting is unnecessary and causes math warnings.
+    no_bg = remove(input_image, session=models["isnet"], alpha_matting=False)
     
     bbox = no_bg.getbbox()
     if not bbox:
