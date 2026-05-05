@@ -11,10 +11,15 @@ from typing import List
 
 app = FastAPI(title="Automotive Catalog API")
 
-# Pre-initialize sessions for better performance
-models = {
-    "isnet": new_session("isnet-general-use"),
-}
+# Global model session cache
+_models = {}
+
+def get_model():
+    if "isnet" not in _models:
+        print("Loading AI model (isnet-general-use)...")
+        _models["isnet"] = new_session("isnet-general-use")
+        print("Model loaded successfully.")
+    return _models["isnet"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -42,7 +47,7 @@ def process_car_image(input_image):
         input_image = input_image.convert("RGB")
         
     # Disabled alpha_matting: Cars have hard edges, so matting is unnecessary and causes math warnings.
-    no_bg = remove(input_image, session=models["isnet"], alpha_matting=False)
+    no_bg = remove(input_image, session=get_model(), alpha_matting=False)
     
     bbox = no_bg.getbbox()
     if not bbox:
