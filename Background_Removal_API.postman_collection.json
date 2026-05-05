@@ -48,6 +48,39 @@
         }
       },
       "response": []
+    },
+    {
+      "name": "Remove Background (File Output)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "images",
+              "type": "file",
+              "src": []
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/remove-bg?format=file",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "remove-bg"
+          ],
+          "query": [
+            {
+              "key": "format",
+              "value": "file"
+            }
+          ]
+        }
+      },
+      "response": []
     }
   ],
   "event": [

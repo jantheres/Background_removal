@@ -1,11 +1,12 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException, Query
-from fastapi.responses import Response
+from fastapi.responses import Response, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from rembg import remove, new_session
 from PIL import Image, ImageOps, ImageEnhance
 import io
 import traceback
 import base64
+import zipfile
 from typing import List
 
 app = FastAPI(title="Automotive Catalog API")
@@ -64,9 +65,14 @@ def home():
     return {"message": "Automotive Catalog API is active"}
 
 @app.post("/remove-bg")
-async def remove_background(images: List[UploadFile] = File(...)):
+async def remove_background(
+    images: List[UploadFile] = File(...),
+    format: str = Query("json", description="Output format: 'json' or 'file'")
+):
     try:
         results = []
+        processed_images = [] # Store raw bytes for file response
+
         for image in images:
             try:
                 input_data = await image.read()
@@ -76,18 +82,57 @@ async def remove_background(images: List[UploadFile] = File(...)):
                 if car is None:
                     continue
                 
-                results.append({
-                    "filename": image.filename,
-                    "images": [
-                        {"label": "Original", "data": to_b64(car), "suffix": "original"},
-                        {"label": "Mirrored", "data": to_b64(car_flipped), "suffix": "mirrored"}
-                    ]
-                })
+                if format == "json":
+                    results.append({
+                        "filename": image.filename,
+                        "images": [
+                            {"label": "Original", "data": to_b64(car), "suffix": "original"},
+                            {"label": "Mirrored", "data": to_b64(car_flipped), "suffix": "mirrored"}
+                        ]
+                    })
+                else:
+                    # For file format, we'll collect the bytes
+                    for img, suffix in [(car, "original"), (car_flipped, "mirrored")]:
+                        img_byte_arr = io.BytesIO()
+                        img.save(img_byte_arr, format='PNG')
+                        processed_images.append({
+                            "bytes": img_byte_arr.getvalue(),
+                            "name": f"{image.filename.split('.')[0]}_{suffix}.png"
+                        })
             except Exception as e:
                 print(f"Error processing {image.filename}: {e}")
                 continue
-                
-        return {"results": results}
+        
+        if format == "json":
+            return {"results": results}
+        
+        # File Format Logic
+        if not processed_images:
+            raise HTTPException(status_code=400, detail="No images processed")
+
+        # If it's a single processed image requested (though we usually have 2: original + mirrored)
+        # or if specifically only one file was produced
+        if len(processed_images) == 1:
+            return Response(
+                content=processed_images[0]["bytes"],
+                media_type="image/png",
+                headers={"Content-Disposition": f"attachment; filename={processed_images[0]['name']}"}
+            )
+        
+        # If multiple files (which is always the case here since we generate original + mirrored)
+        # return a ZIP archive
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+            for img_info in processed_images:
+                zip_file.writestr(img_info["name"], img_info["bytes"])
+        
+        zip_buffer.seek(0)
+        return StreamingResponse(
+            zip_buffer,
+            media_type="application/x-zip-compressed",
+            headers={"Content-Disposition": "attachment; filename=processed_vehicles.zip"}
+        )
+
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
