@@ -151,7 +151,7 @@ body {
   justify-content: center;
   transition: all 0.2s;
 }
-
+ 
 .theme-btn:hover {
   transform: translateY(-2px);
   border-color: var(--accent);
@@ -162,7 +162,7 @@ body {
 .upload-area {
   border: 2px dashed var(--border-color);
   background: var(--upload-bg);
-  border-radius: 24px;
+  border-radius: 24px; 
   padding: 5rem 2rem;
   text-align: center;
   cursor: pointer;
